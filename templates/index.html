@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Analyze your resume with AI and get instant, actionable feedback to land your dream job." />
+  <title>AI Resume Analyzer</title>
+  <style>
+    /* ============================================
+   AI RESUME ANALYZER — styles.css
+   Design: Light theme, blue/purple gradient
+   ============================================ */
+
+/* ---------- Google Font ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ---------- CSS Variables ---------- */
+:root {
+  --bg-gradient   : linear-gradient(135deg, hsl(220,60%,98%) 0%, hsl(246,70%,96%) 50%, hsl(260,65%,95%) 100%);
+  --btn-gradient  : linear-gradient(135deg, hsl(246,80%,62%), hsl(220,90%,60%));
+  --btn-hover     : linear-gradient(135deg, hsl(246,80%,55%), hsl(220,90%,53%));
+  --card-gradient : linear-gradient(145deg, hsl(0,0%,100%), hsl(246,60%,98%));
+  --score-gradient: linear-gradient(135deg, hsl(246,80%,62%), hsl(220,90%,68%));
+
+  --primary       : hsl(246,80%,62%);
+  --foreground    : hsl(224,40%,12%);
+  --muted         : hsl(215,20%,50%);
+  --border        : hsl(214,25%,88%);
+  --card-bg       : hsl(0,0%,100%);
+  --accent-bg     : hsl(246,70%,95%);
+  --accent-fg     : hsl(246,80%,45%);
+
+  --skill-present-bg : hsl(158,60%,88%);
+  --skill-present-fg : hsl(158,60%,28%);
+  --skill-missing-bg : hsl(15,85%,90%);
+  --skill-missing-fg : hsl(15,85%,38%);
+
+  --shadow-sm : 0 2px 8px -2px hsl(246,80%,62%,0.10);
+  --shadow-md : 0 8px 24px -4px hsl(246,80%,62%,0.15), 0 2px 8px -2px hsl(0,0%,0%,0.06);
+  --shadow-lg : 0 16px 40px -8px hsl(246,80%,62%,0.20), 0 4px 12px -4px hsl(0,0%,0%,0.08);
+  --shadow-glow: 0 0 32px hsl(246,80%,62%,0.28);
+
+  --radius-sm : 0.5rem;
+  --radius-md : 0.875rem;
+  --radius-lg : 1.25rem;
+  --radius-xl : 1.5rem;
+}
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Background Decoration ---------- */
+.bg-deco {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-deco img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.3;
+  position: absolute; inset: 0;
+}
+.bg-deco .orb1 {
+  position: absolute;
+  top: -20%; right: -10%;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(246,80%,62%,0.12) 0%, transparent 70%);
+}
+.bg-deco .orb2 {
+  position: absolute;
+  bottom: -10%; left: -5%;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(220,90%,68%,0.10) 0%, transparent 70%);
+}
+
+/* ---------- Nav ---------- */
+nav {
+  position: relative; z-index: 10;
+  max-width: 960px; margin: 0 auto;
+  padding: 1.5rem 1.5rem 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 0.5rem;
+  text-decoration: none;
+}
+.nav-logo-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--btn-gradient);
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-logo-icon svg { width: 18px; height: 18px; color: #fff; }
+.nav-logo span {
+  font-weight: 700; font-size: 0.875rem;
+  letter-spacing: -0.02em; color: var(--foreground);
+}
+.nav-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600;
+  background: var(--skill-present-bg);
+  color: var(--skill-present-fg);
+}
+.nav-badge .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: hsl(158,60%,38%);
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+/* ---------- Hero ---------- */
+header {
+  position: relative; z-index: 10;
+  text-align: center;
+  padding: 3.5rem 1.5rem 2rem;
+}
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600;
+  background: var(--accent-bg);
+  border: 1px solid hsl(246,80%,62%,0.2);
+  color: var(--accent-fg);
+  margin-bottom: 1.5rem;
+}
+.hero-pill svg { width: 14px; height: 14px; }
+
+h1 {
+  font-size: clamp(2.8rem, 8vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--foreground);
+  margin-bottom: 1rem;
+}
+h1 .gradient-text {
+  background: var(--btn-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: 1.05rem; color: var(--muted);
+  max-width: 480px; margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+/* Feature chips */
+.feature-chips {
+  display: flex; flex-wrap: wrap;
+  justify-content: center; gap: 0.75rem;
+  margin-top: 2rem;
+}
+.chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(4px);
+  box-shadow: var(--shadow-sm);
+}
+.chip-icon {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--btn-gradient);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.chip-icon svg { width: 14px; height: 14px; color: #fff; }
+.chip-label { font-size: 0.75rem; font-weight: 600; color: var(--foreground); line-height: 1; }
+.chip-desc  { font-size: 0.65rem; color: var(--muted); }
+
+/* ---------- Main Card ---------- */
+main {
+  position: relative; z-index: 10;
+  max-width: 720px; margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+.main-card {
+  background: var(--card-gradient);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2.25rem;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(4px);
+}
+.main-card h2 {
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--foreground); margin-bottom: 0.25rem;
+}
+.main-card .card-sub {
+  font-size: 0.875rem; color: var(--muted); margin-bottom: 1.75rem;
+}
+
+/* ---------- Upload Zone ---------- */
+.upload-zone {
+  border: 2px dashed hsl(246,80%,62%,0.35);
+  background: var(--accent-bg);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: hsl(246,80%,62%,0.75);
+  background: hsl(246,80%,62%,0.06);
+  box-shadow: 0 0 0 4px hsl(246,80%,62%,0.10);
+}
+.upload-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: var(--btn-gradient);
+  box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem;
+}
+.upload-icon svg { width: 28px; height: 28px; color: #fff; }
+.upload-zone p { font-weight: 600; color: var(--foreground); margin-bottom: 0.25rem; }
+.upload-zone .upload-sub { font-size: 0.875rem; color: var(--muted); }
+.upload-zone .upload-sub span { color: var(--primary); font-weight: 500; }
+
+/* Uploaded file state */
+.file-loaded {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.75rem;
+}
+.upload-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.82);
+  color: hsl(216, 31%, 23%);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(3px);
+  z-index: 12;
+  text-align: center;
+  padding: 1rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.upload-overlay.show {
+  opacity: 1;
+}
+.file-loaded-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--btn-gradient);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.file-loaded-icon svg { width: 24px; height: 24px; color: #fff; }
+.file-loaded-info { text-align: left; }
+.file-loaded-info .filename { font-size: 0.875rem; font-weight: 600; color: var(--foreground); }
+.file-loaded-info .filesub  { font-size: 0.75rem; color: var(--muted); }
+.btn-clear {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: hsl(214,30%,93%);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+  margin-left: 0.5rem;
+}
+.btn-clear:hover { background: hsl(0,72%,51%,0.12); }
+.btn-clear svg { width: 16px; height: 16px; color: var(--muted); }
+
+/* Divider */
+.or-divider {
+  display: flex; align-items: center; gap: 1rem;
+  margin: 1.25rem 0;
+}
+.or-divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+.or-divider span {
+  font-size: 0.7rem; font-weight: 500; color: var(--muted);
+  padding: 4px 10px; border-radius: 999px;
+  background: hsl(214,30%,93%);
+}
+
+/* Textarea */
+.resume-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card-bg);
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--foreground);
+  resize: none;
+  outline: none;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  line-height: 1.6;
+}
+.resume-textarea::placeholder { color: var(--muted); }
+.resume-textarea:focus {
+  border-color: hsl(246,80%,62%,0.5);
+  box-shadow: 0 0 0 3px hsl(246,80%,62%,0.12);
+}
+.char-count {
+  text-align: right; font-size: 0.7rem; color: var(--muted);
+  margin-top: 0.35rem;
+}
+
+/* ---------- Analyze Button ---------- */
+.btn-wrap { display: flex; justify-content: center; margin-top: 2rem; }
+.btn-analyze {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 36px;
+  border-radius: 999px;
+  background: var(--btn-gradient);
+  color: #fff;
+  font-size: 1rem; font-weight: 700;
+  border: none; cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  letter-spacing: -0.01em;
+}
+.btn-analyze:hover:not(:disabled) {
+  background: var(--btn-hover);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+.btn-analyze:active:not(:disabled) { transform: translateY(0); }
+.btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-analyze svg { width: 20px; height: 20px; }
+.btn-analyze .spinner {
+  width: 20px; height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+.hint {
+  text-align: center; font-size: 0.75rem;
+  color: var(--muted); margin-top: 0.75rem;
+}
+
+/* ---------- Results Section ---------- */
+#results { margin-top: 2rem; }
+.results-divider {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.results-divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+.results-divider span {
+  font-size: 0.75rem; font-weight: 600; color: var(--muted);
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+}
+
+.results-grid { display: grid; gap: 1.25rem; }
+
+/* Glass card */
+.glass-card {
+  background: var(--card-gradient);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  animation: fadeInUp 0.45s cubic-bezier(0.4,0,0.2,1) forwards;
+  opacity: 0;
+}
+.glass-card.d1 { animation-delay: 0.05s; }
+.glass-card.d2 { animation-delay: 0.12s; }
+.glass-card.d3 { animation-delay: 0.20s; }
+.glass-card.d4 { animation-delay: 0.28s; }
+
+.card-header {
+  display: flex; align-items: center; gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.card-header-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--btn-gradient);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.card-header-icon svg { width: 16px; height: 16px; color: #fff; }
+.card-header-icon.amber { background: hsl(40,90%,90%); }
+.card-header-icon.amber svg { color: hsl(40,80%,40%); }
+.card-header h3 {
+  font-size: 0.9375rem; font-weight: 600; color: var(--foreground);
+}
+
+/* Score Card */
+.score-card-body {
+  display: flex; align-items: center; gap: 2rem;
+  flex-wrap: wrap;
+}
+.score-ring-wrap { position: relative; flex-shrink: 0; }
+.score-ring-svg { transform: rotate(-90deg); }
+.score-ring-bg { fill: none; stroke: hsl(214,30%,93%); stroke-width: 10; }
+.score-ring-fg {
+  fill: none; stroke: url(#scoreGrad);
+  stroke-width: 10; stroke-linecap: round;
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+.score-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.score-num {
+  font-size: 2rem; font-weight: 900;
+  background: var(--score-gradient);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; line-height: 1;
+}
+.score-label { font-size: 0.65rem; font-weight: 600; color: var(--muted); }
+.score-info { flex: 1; min-width: 180px; }
+.score-info .score-title {
+  font-size: 1.125rem; font-weight: 700; color: var(--foreground); margin-bottom: 0.25rem;
+}
+.score-info .score-sub { font-size: 0.825rem; color: var(--muted); margin-bottom: 0.75rem; }
+.score-bar-wrap { background: hsl(214,30%,93%); border-radius: 999px; height: 8px; overflow: hidden; }
+.score-bar {
+  height: 100%; border-radius: 999px;
+  background: var(--btn-gradient);
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Skills */
+.tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.tag {
+  padding: 5px 12px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600;
+}
+.tag-present { background: var(--skill-present-bg); color: var(--skill-present-fg); }
+.tag-missing  { background: var(--skill-missing-bg); color: var(--skill-missing-fg); }
+.skills-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.skills-section-label {
+  font-size: 0.7rem; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 0.6rem;
+}
+
+/* Summary & Suggestions */
+.summary-text { font-size: 0.875rem; color: var(--muted); line-height: 1.7; }
+.suggestions-list { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; }
+.suggestions-list li {
+  display: flex; align-items: flex-start; gap: 0.625rem;
+  font-size: 0.875rem; color: var(--muted); line-height: 1.6;
+}
+.sug-num {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--btn-gradient); color: #fff;
+  font-size: 0.7rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 2px;
+}
+.summary-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+
+/* Re-analyze */
+.reanalyze-wrap { text-align: center; padding-top: 1rem; }
+.btn-reanalyze {
+  background: none; border: none; cursor: pointer;
+  font-size: 0.875rem; font-weight: 500;
+  color: var(--primary); font-family: inherit;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.btn-reanalyze:hover { opacity: 0.75; }
+
+/* ---------- Footer ---------- */
+footer {
+  position: relative; z-index: 10;
+  text-align: center; padding-bottom: 2rem;
+  font-size: 0.75rem; color: var(--muted);
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseSoft {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .main-card { padding: 1.5rem; }
+  .score-card-body { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .skills-two-col { grid-template-columns: 1fr; }
+  .summary-two-col { grid-template-columns: 1fr; }
+  .feature-chips { gap: 0.5rem; }
+  .nav-badge { display: none; }
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- Background Decoration -->
+  <div class="bg-deco">
+    <img src="assets/hero-bg.jpg" alt="" loading="lazy" />
+    <div class="orb1"></div>
+    <div class="orb2"></div>
+  </div>
+
+  <!-- Nav -->
+  <nav>
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-icon">
+        <!-- Brain icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-1.64Z"/>
+          <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-1.64Z"/>
+        </svg>
+      </div>
+      <span>ResumeAI</span>
+    </a>
+    <span class="nav-badge">
+      <span class="dot"></span>
+      AI Ready
+    </span>
+  </nav>
+
+  <!-- Hero Header -->
+  <header>
+    <div class="hero-pill">
+      <!-- Sparkles -->
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2zM5 14l.75 2.25L8 17l-2.25.75L5 20l-.75-2.25L2 17l2.25-.75L5 14zM19 14l.75 2.25L22 17l-2.25.75L19 20l-.75-2.25L16 17l2.25-.75L19 14z"/>
+      </svg>
+      Powered by Artificial Intelligence
+    </div>
+
+    <h1>
+      AI&nbsp;<span class="gradient-text">Resume</span><br/>Analyzer
+    </h1>
+
+    <p class="hero-sub">
+      Analyze your resume with AI and get instant, actionable feedback to land your dream job.
+    </p>
+
+    <!-- Feature Chips -->
+    <div class="feature-chips">
+      <!-- Instant Analysis -->
+      <div class="chip">
+        <div class="chip-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <div>
+          <p class="chip-label">Instant Analysis</p>
+          <p class="chip-desc">Get results in seconds</p>
+        </div>
+      </div>
+      <!-- AI Powered -->
+      <div class="chip">
+        <div class="chip-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-1.64Z"/>
+            <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-1.64Z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="chip-label">AI-Powered</p>
+          <p class="chip-desc">Smart skill detection</p>
+        </div>
+      </div>
+      <!-- Privacy -->
+      <div class="chip">
+        <div class="chip-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="chip-label">Privacy First</p>
+          <p class="chip-desc">No data stored</p>
+        </div>
+      </div>
+      <!-- ATS -->
+      <div class="chip">
+        <div class="chip-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div>
+          <p class="chip-label">ATS Optimized</p>
+          <p class="chip-desc">Beat screening bots</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Upload Card -->
+  <main>
+    <div class="main-card">
+      <h2>Upload Your Resume</h2>
+      <p class="card-sub">Drop a file or paste your resume text below for AI analysis</p>
+
+      <!-- Drag & Drop Zone -->
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-overlay" id="uploadOverlay">Currently unavailable</div>
+        <input type="file" id="fileInput" accept=".txt" hidden />
+
+        <!-- Default state -->
+        <div id="uploadDefault">
+          <div class="upload-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+            </svg>
+          </div>
+          <p>Drop your resume here</p>
+          <p class="upload-sub">or <span>browse files</span> — TXT supported only</p>
+        </div>
+
+        <!-- Loaded state -->
+        <div id="uploadLoaded" class="file-loaded" style="display:none">
+          <div class="file-loaded-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="file-loaded-info" id="loadedName">
+            <p class="filename"></p>
+            <p class="filesub">File loaded successfully</p>
+          </div>
+          <button class="btn-clear" id="btnClear" title="Remove file">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- OR divider -->
+      <div class="or-divider">
+        <hr /><span>OR PASTE TEXT</span><hr />
+      </div>
+
+      <!-- Textarea -->
+      <div>
+        <textarea
+          id="resumeText"
+          class="resume-textarea"
+          rows="7"
+          placeholder="Paste your resume content here… Include your skills, experience, education, and achievements for the most accurate analysis."
+        ></textarea>
+        <p class="char-count" id="charCount"></p>
+      </div>
+
+      <!-- Analyze Button -->
+      <div class="btn-wrap">
+        <button class="btn-analyze" id="btnAnalyze" disabled>
+          <div class="spinner" id="btnSpinner" style="display:none"></div>
+          <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span id="btnLabel">Analyze Resume</span>
+        </button>
+      </div>
+      <p class="hint" id="hintText">
+        Upload a file or paste at least 20 characters of resume text to continue
+      </p>
+    </div>
+
+    <!-- Results -->
+    <div id="results" style="display:none"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    Built with AI &middot; No data stored &middot; Free to use
+  </footer>
+  <script>
+/* ---------- DOM Refs ---------- */
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const uploadDefault = document.getElementById('uploadDefault');
+const uploadLoaded = document.getElementById('uploadLoaded');
+const loadedName = document.getElementById('loadedName');
+const btnClear = document.getElementById('btnClear');
+const resumeText = document.getElementById('resumeText');
+const charCount = document.getElementById('charCount');
+const hintText = document.getElementById('hintText');
+const btnAnalyze = document.getElementById('btnAnalyze');
+const btnIcon = document.getElementById('btnIcon');
+const btnSpinner = document.getElementById('btnSpinner');
+const btnLabel = document.getElementById('btnLabel');
+const resultsSection = document.getElementById('results');
+
+/* ---------- State ---------- */
+let uploadedFileName = null;
+
+/* ---------- Helpers ---------- */
+function hasContent() {
+  return resumeText.value.trim().length > 20 || uploadedFileName !== null;
+}
+
+function syncAnalyzeBtn() {
+  btnAnalyze.disabled = !hasContent();
+  hintText.style.display = hasContent() ? 'none' : 'block';
+}
+
+function updateCharCount() {
+  const len = resumeText.value.length;
+  charCount.textContent = len ? `${len} characters` : '';
+}
+
+/* ---------- File Handling ---------- */
+uploadZone.addEventListener('click', () => fileInput.click());
+
+uploadZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  uploadZone.classList.add('drag-over');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.classList.remove('drag-over');
+});
+
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) readFile(fileInput.files[0]);
+});
+
+function readFile(file) {
+  const allowedTypes = ['txt'];
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (!allowedTypes.includes(ext)) {
+    alert('Only TXT files are allowed.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    resumeText.value = '';
+    updateCharCount();
+    setFileLoaded(file.name);
+    syncAnalyzeBtn();
+  };
+  reader.readAsText(file);
+}
+
+function setFileLoaded(name) {
+  uploadedFileName = name;
+  loadedName.querySelector('.filename').textContent = name;
+  uploadDefault.style.display = 'none';
+  uploadLoaded.style.display = 'flex';
+}
+
+function clearFile() {
+  uploadedFileName = null;
+  resumeText.value = '';
+  updateCharCount();
+  uploadDefault.style.display = 'block';
+  uploadLoaded.style.display = 'none';
+  fileInput.value = '';
+  syncAnalyzeBtn();
+}
+
+btnClear.addEventListener('click', e => {
+  e.stopPropagation();
+  clearFile();
+});
+
+resumeText.addEventListener('input', () => {
+  updateCharCount();
+  syncAnalyzeBtn();
+});
+
+/* ---------- Analyze using Backend ---------- */
+btnAnalyze.addEventListener('click', async () => {
+  if (!hasContent()) return;
+
+  btnIcon.style.display = 'none';
+  btnSpinner.style.display = 'block';
+  btnLabel.textContent = 'Analyzing...';
+  btnAnalyze.disabled = true;
+  resultsSection.innerHTML = '';
+  resultsSection.style.display = 'none';
+
+  try {
+    const formData = new FormData();
+    const file = fileInput.files[0];
+    const text = resumeText.value.trim();
+
+    if (file) {
+      formData.append('file', file);
+    }
+
+    if (text) {
+      formData.append('text', text);
+    }
+
+    const res = await fetch('/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || 'Something went wrong');
+    }
+
+    renderResults({
+      score: data.score || 0,
+      presentSkills: data.presentSkills || [],
+      missingSkills: data.missingSkills || [],
+      summary: data.summary || 'No summary available.',
+      suggestions: data.suggestions || []
+    });
+
+    resultsSection.style.display = 'block';
+    setTimeout(() => {
+      resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+
+  } catch (error) {
+    resultsSection.style.display = 'block';
+    resultsSection.innerHTML = `
+      <div class="results-divider">
+        <hr><span>Analysis Results</span><hr>
+      </div>
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-header-icon amber">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3>Error</h3>
+        </div>
+        <p class="summary-text">${error.message}</p>
+      </div>
+    `;
+  } finally {
+    btnIcon.style.display = 'block';
+    btnSpinner.style.display = 'none';
+    btnLabel.textContent = 'Analyze Resume';
+    syncAnalyzeBtn();
+  }
+});
+
+/* ---------- Render Results ---------- */
+function scoreLabel(s) {
+  if (s >= 85) return ['Excellent', 'Your resume stands out!'];
+  if (s >= 70) return ['Good', 'Strong profile with room to grow.'];
+  if (s >= 50) return ['Fair', 'Solid base — improvements will help.'];
+  return ['Needs Work', 'Several areas need improvement.'];
+}
+
+function renderResults(r) {
+  const circ = 2 * Math.PI * 52;
+  const offset = circ * (1 - r.score / 100);
+  const [sl, ss] = scoreLabel(r.score);
+
+  resultsSection.innerHTML = `
+    <div class="results-divider">
+      <hr><span>Analysis Results</span><hr>
+    </div>
+
+    <div class="results-grid">
+
+      <div class="glass-card d1">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Resume Score</h3>
+        </div>
+        <div class="score-card-body">
+          <div class="score-ring-wrap">
+            <svg class="score-ring-svg" width="120" height="120" viewBox="0 0 120 120">
+              <defs>
+                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="hsl(246,80%,62%)"/>
+                  <stop offset="100%" stop-color="hsl(220,90%,68%)"/>
+                </linearGradient>
+              </defs>
+              <circle class="score-ring-bg" cx="60" cy="60" r="52"/>
+              <circle class="score-ring-fg" cx="60" cy="60" r="52"
+                stroke-dasharray="${circ}"
+                stroke-dashoffset="${circ}"
+                id="scoreArc"/>
+            </svg>
+            <div class="score-center">
+              <span class="score-num">${r.score}</span>
+              <span class="score-label">/ 100</span>
+            </div>
+          </div>
+          <div class="score-info">
+            <div class="score-title">${sl}</div>
+            <div class="score-sub">${ss}</div>
+            <div class="score-bar-wrap">
+              <div class="score-bar" id="scoreBar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card d2">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+          </div>
+          <h3>Skills Analysis</h3>
+        </div>
+        <div class="skills-two-col">
+          <div>
+            <div class="skills-section-label">✓ Detected Skills (${r.presentSkills.length})</div>
+            <div class="tags">
+              ${r.presentSkills.map(s => `<span class="tag tag-present">${s}</span>`).join('')}
+            </div>
+          </div>
+          <div>
+            <div class="skills-section-label">✗ Missing Skills (${r.missingSkills.length})</div>
+            <div class="tags">
+              ${r.missingSkills.map(s => `<span class="tag tag-missing">${s}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-two-col">
+        <div class="glass-card d3">
+          <div class="card-header">
+            <div class="card-header-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3>AI Summary</h3>
+          </div>
+          <p class="summary-text">${r.summary}</p>
+        </div>
+
+        <div class="glass-card d4">
+          <div class="card-header">
+            <div class="card-header-icon amber">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+            </div>
+            <h3>Improvement Tips</h3>
+          </div>
+          <ul class="suggestions-list">
+            ${r.suggestions.map((s, i) => `<li><span class="sug-num">${i + 1}</span><span>${s}</span></li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="reanalyze-wrap">
+      <button class="btn-reanalyze" id="btnReanalyze">← Analyze another resume</button>
+    </div>
+  `;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.getElementById('scoreArc').style.strokeDashoffset = offset;
+      document.getElementById('scoreBar').style.width = r.score + '%';
+    });
+  });
+
+  document.getElementById('btnReanalyze').addEventListener('click', () => {
+    resultsSection.innerHTML = '';
+    resultsSection.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* ---------- Upload overlay behavior ---------- */
+const uploadOverlay = document.getElementById('uploadOverlay');
+
+function showUploadOverlay(message) {
+  uploadOverlay.textContent = message;
+  uploadOverlay.classList.add('show');
+}
+
+function hideUploadOverlay() {
+  uploadOverlay.classList.remove('show');
+}
+
+// Show overlay only during dragover; drag-drop is temporarily unavailable.
+uploadZone.addEventListener('dragover', event => {
+  event.preventDefault();
+  showUploadOverlay('Drag & drop is temporarily unavailable. Please click to upload.');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+  hideUploadOverlay();
+});
+
+uploadZone.addEventListener('drop', event => {
+  event.preventDefault();
+  hideUploadOverlay();
+  alert('Drag & drop is currently unavailable. Please click the box and choose a file.');
+});
+
+/* ---------- Init ---------- */
+syncAnalyzeBtn();
+</script>
+</body>
+</html>
